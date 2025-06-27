@@ -41,6 +41,8 @@ function createTlsConfig() {
             key: fs.readFileSync(path.resolve(config.tls.key)),
             cert: fs.readFileSync(path.resolve(config.tls.cert)),
             ca: [fs.readFileSync(path.resolve(config.tls.ca))],
+            // 添加超时设置
+            timeout: 30000,  // 30秒连接超时
             // rejectUnauthorized: true,  // 启用证书验证
             // secureProtocol: 'TLSv1_2_method',
             // ciphers: 'ALL',
@@ -238,17 +240,26 @@ function handleHttpsRequest(clientSocket, target) {
         })
     })
 
-    // 处理远程服务器断开连接
-    remoteSocket.on('end', () => {
-        logger.debug("远程服务器断开连接")
-        clientSocket.end()
+    // 添加连接超时处理
+    remoteSocket.setTimeout(30000, () => {
+        logger.warn(`远程服务器连接超时: ${target}`)
+        handleError(remoteSocket, new Error('连接超时'), '连接超时')
     })
 
-    // 处理错误
+    // 添加错误处理
     remoteSocket.on('error', (err) => {
         logger.error(`远程服务器连接错误: ${err.message}`)
         logger.error(`错误代码: ${err.code}, 错误类型: ${err.type}`)
         handleError(clientSocket, err, '远程服务器连接错误')
+    })
+
+    // 添加连接关闭处理
+    remoteSocket.on('close', (hadError) => {
+        if (hadError) {
+            logger.warn(`远程服务器连接异常关闭: ${target}`)
+        } else {
+            logger.debug(`远程服务器连接正常关闭: ${target}`)
+        }
     })
 }
 
