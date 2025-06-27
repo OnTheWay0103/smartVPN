@@ -1,0 +1,70 @@
+{
+  "name": "smartvpn",
+  "version": "1.0.0",
+  "description": "智能代理系统，支持TLS加密通信、自动代理设置和白名单域名过滤",
+  "main": "client.js",
+  "scripts": {
+    "start": "node client.js",
+    "server": "node server.js",
+    "test": "node client.test.js && node server.test.js",
+    "test:client": "node client.test.js",
+    "test:server": "node server.test.js",
+    "test:proxy": "node test-proxy.js",
+    "dev": "nodemon client.js",
+    "dev:server": "nodemon server.js",
+    "setup": "node scripts/setup.js",
+    "cert:generate": "cd env && ./generate-certs.sh",
+    "lint": "eslint *.js utils/*.js",
+    "format": "prettier --write *.js utils/*.js",
+    "docs": "jsdoc -c jsdoc.json"
+  },
+  "keywords": [
+    "vpn",
+    "proxy",
+    "tls",
+    "encryption",
+    "network",
+    "security",
+    "client",
+    "server"
+  ],
+  "author": "OnTheWay0103",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:OnTheWay0103/smartVPN.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OnTheWay0103/smartVPN/issues"
+  },
+  "homepage": "https://github.com/OnTheWay0103/smartVPN#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {
+    "regedit": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "eslint": "^8.0.0",
+    "prettier": "^2.8.0",
+    "jsdoc": "^3.6.0"
+  },
+  "os": [
+    "win32",
+    "darwin"
+  ],
+  "files": [
+    "client.js",
+    "server.js",
+    "setProxy.js",
+    "whitelist.js",
+    "utils/",
+    "env/",
+    "regedit-vbs/",
+    "README.md",
+    "CONTRIBUTING.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ]
+} 
