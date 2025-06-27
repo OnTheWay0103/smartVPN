@@ -4,8 +4,20 @@ const fs = require('fs')
 const path = require('path')
 const logger = require('./utils/logger')
 
-// 配置远程服务器的监听端口
-const SERVER_PORT = 888 //443
+// 加载配置文件
+let config
+try {
+  config = require('./env/config')
+} catch (error) {
+  logger.error('无法加载配置文件: ' + error.message)
+  logger.error('请确保 env/config.js 文件存在且格式正确')
+  process.exit(1)
+}
+
+// 从配置文件获取端口，如果没有则使用默认值
+const SERVER_PORT = config.remote?.port || 443
+
+logger.info(`使用端口: ${SERVER_PORT} (从配置文件读取)`)
 
 // 连接管理
 const activeConnections = new Set()
