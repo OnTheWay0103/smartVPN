@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const CONFIG = require('./const');
+const CONFIG = require('../lib/utils/const');
 
 function writeTempFile(lines) {
   const tmpPath = path.join(os.tmpdir(), `vpn-proxy-${Date.now()}-${Math.random()}.txt`);

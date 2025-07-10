@@ -1,5 +1,5 @@
 const { exec } = require('child_process')
-const logger = require('./utils/logger')
+const logger = require('../lib/utils/logger')
 
 // 清理可能存在的旧进程
 logger.info('清理可能存在的旧进程...')
@@ -14,7 +14,7 @@ exec('pkill -f "node client.js"', (error) => {
     setTimeout(() => {
         // 启动代理服务器
         logger.info('正在启动代理服务器...')
-        const proxyServer = exec('node client.js')
+        const proxyServer = exec('node ../src/client.js')
 
         // 处理代理服务器输出
         proxyServer.stdout.on('data', (data) => {
@@ -55,6 +55,6 @@ exec('pkill -f "node client.js"', (error) => {
 // 处理进程退出
 process.on('SIGINT', () => {
     logger.info('正在关闭代理服务器...')
-    exec('pkill -f "node client.js"')
+    exec('pkill -f "node.*client.js"')
     process.exit()
 }) 

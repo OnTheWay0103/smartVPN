@@ -2,11 +2,11 @@ const tls = require('tls')
 const net = require('net')
 const fs = require('fs')
 const path = require('path')
-const logger = require('./utils/logger')
+const logger = require('../lib/utils/logger')
 
 // 测试配置
 const SERVER_PORT = 888
-const CERT_DIR = path.join(__dirname, 'env')
+const CERT_DIR = path.join(__dirname, '../certs')
 
 // 测试用例
 const tests = [
@@ -15,7 +15,7 @@ const tests = [
     run: async () => {
       try {
         // 启动服务器
-        require('./server')
+        require('../src/server')
         logger.info('服务器启动成功')
         return true
       } catch (err) {

@@ -23,13 +23,13 @@ coverage/
 .env.production.local
 
 # 证书文件（安全考虑）
-env/*.pem
-env/*.key
-env/*.crt
-env/*.csr
+certs/*.pem
+certs/*.key
+certs/*.crt
+certs/*.csr
 
 # 配置文件（包含敏感信息）
-env/config.js
+config/config.js
 
 # 临时文件
 userinput.py

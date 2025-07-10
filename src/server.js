@@ -2,15 +2,15 @@ const net = require('net')
 const tls = require('tls')
 const fs = require('fs')
 const path = require('path')
-const logger = require('./utils/logger')
+const logger = require('../lib/utils/logger')
 
 // 加载配置文件
 let config
 try {
-  config = require('./env/config')
+  config = require('../config/config')
 } catch (error) {
   logger.error('无法加载配置文件: ' + error.message)
-  logger.error('请确保 env/config.js 文件存在且格式正确')
+  logger.error('请确保 config/config.js 文件存在且格式正确')
   process.exit(1)
 }
 
@@ -46,7 +46,7 @@ setInterval(() => {
 setInterval(logConnectionStats, 60000) // 每分钟输出一次
 
 // 证书文件路径
-const CERT_DIR = path.join(__dirname, 'env')
+const CERT_DIR = path.join(__dirname, '../certs')
 const requiredCertFiles = [
   'server-key.pem',
   'server-cert.pem',

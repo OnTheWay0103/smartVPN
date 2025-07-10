@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+
+// 指向主程序入口
+require('../src/index.js'); 
