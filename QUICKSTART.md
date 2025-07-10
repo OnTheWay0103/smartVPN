@@ -27,7 +27,11 @@ npm run setup
 ### 3. 生成证书
 
 ```bash
-cd env
+# 使用自动生成脚本
+npm run cert:generate
+
+# 或手动运行脚本
+cd scripts
 ./generate-certs.sh
 cd ..
 ```

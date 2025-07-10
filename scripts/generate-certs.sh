@@ -20,6 +20,12 @@ fi
 
 echo "✅ OpenSSL 已安装: $(openssl version)"
 
+# 创建证书目录
+if [ ! -d "../certs" ]; then
+    echo "创建证书目录..."
+    mkdir -p ../certs
+fi
+
 # 检查配置文件
 if [ ! -f "openssl.cnf" ]; then
     echo "❌ 错误: openssl.cnf 配置文件不存在"
@@ -34,18 +40,18 @@ echo "🔧 生成服务器证书..."
 echo "------------------------"
 
 # 生成服务器私钥
-if [ ! -f "server-key.pem" ]; then
+if [ ! -f "../certs/server-key.pem" ]; then
     echo "生成服务器私钥..."
-    openssl req -newkey rsa:4096 -nodes -keyout server-key.pem -out server.csr -config openssl.cnf -subj "/C=CN/ST=Beijing/L=Beijing/O=SmartVPN/OU=Server/CN=smartvpn-server"
+    openssl req -newkey rsa:4096 -nodes -keyout ../certs/server-key.pem -out server.csr -config openssl.cnf -subj "/C=CN/ST=Beijing/L=Beijing/O=SmartVPN/OU=Server/CN=smartvpn-server"
     echo "✅ 服务器私钥生成完成"
 else
     echo "⚠️  服务器私钥已存在，跳过生成"
 fi
 
 # 生成服务器证书
-if [ ! -f "server-cert.pem" ]; then
+if [ ! -f "../certs/server-cert.pem" ]; then
     echo "生成服务器证书..."
-    openssl x509 -req -in server.csr -signkey server-key.pem -out server-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
+    openssl x509 -req -in server.csr -signkey ../certs/server-key.pem -out ../certs/server-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
     echo "✅ 服务器证书生成完成"
 else
     echo "⚠️  服务器证书已存在，跳过生成"
@@ -57,18 +63,18 @@ echo "🔧 生成客户端证书..."
 echo "------------------------"
 
 # 生成客户端私钥
-if [ ! -f "client-key.pem" ]; then
+if [ ! -f "../certs/client-key.pem" ]; then
     echo "生成客户端私钥..."
-    openssl req -newkey rsa:4096 -nodes -keyout client-key.pem -out client.csr -config openssl.cnf -subj "/C=CN/ST=Beijing/L=Beijing/O=SmartVPN/OU=Client/CN=smartvpn-client"
+    openssl req -newkey rsa:4096 -nodes -keyout ../certs/client-key.pem -out client.csr -config openssl.cnf -subj "/C=CN/ST=Beijing/L=Beijing/O=SmartVPN/OU=Client/CN=smartvpn-client"
     echo "✅ 客户端私钥生成完成"
 else
     echo "⚠️  客户端私钥已存在，跳过生成"
 fi
 
 # 生成客户端证书
-if [ ! -f "client-cert.pem" ]; then
+if [ ! -f "../certs/client-cert.pem" ]; then
     echo "生成客户端证书..."
-    openssl x509 -req -in client.csr -signkey client-key.pem -out client-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
+    openssl x509 -req -in client.csr -signkey ../certs/client-key.pem -out ../certs/client-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
     echo "✅ 客户端证书生成完成"
 else
     echo "⚠️  客户端证书已存在，跳过生成"
@@ -83,7 +89,7 @@ echo "✅ 临时文件清理完成"
 # 设置文件权限
 echo ""
 echo "🔒 设置文件权限..."
-chmod 600 *.pem
+chmod 600 ../certs/*.pem
 echo "✅ 文件权限设置完成"
 
 # 验证证书
@@ -92,21 +98,21 @@ echo "🔍 验证证书..."
 echo "------------------------"
 
 echo "服务器证书信息:"
-openssl x509 -in server-cert.pem -text -noout | grep -E "(Subject:|Issuer:|Not Before|Not After)"
+openssl x509 -in ../certs/server-cert.pem -text -noout | grep -E "(Subject:|Issuer:|Not Before|Not After)"
 
 echo ""
 echo "客户端证书信息:"
-openssl x509 -in client-cert.pem -text -noout | grep -E "(Subject:|Issuer:|Not Before|Not After)"
+openssl x509 -in ../certs/client-cert.pem -text -noout | grep -E "(Subject:|Issuer:|Not Before|Not After)"
 
 echo ""
 echo "🎉 证书生成完成！"
 echo "================================"
 echo ""
 echo "📁 生成的文件:"
-echo "  - server-key.pem    (服务器私钥)"
-echo "  - server-cert.pem   (服务器证书)"
-echo "  - client-key.pem    (客户端私钥)"
-echo "  - client-cert.pem   (客户端证书)"
+echo "  - certs/server-key.pem    (服务器私钥)"
+echo "  - certs/server-cert.pem   (服务器证书)"
+echo "  - certs/client-key.pem    (客户端私钥)"
+echo "  - certs/client-cert.pem   (客户端证书)"
 echo ""
 echo "⚠️  重要提醒:"
 echo "  - 请妥善保管私钥文件"
@@ -114,6 +120,6 @@ echo "  - 证书有效期为 365 天"
 echo "  - 生产环境建议使用 CA 签发的证书"
 echo ""
 echo "📖 下一步:"
-echo "  1. 配置 env/config.js 文件"
+echo "  1. 配置 config/config.js 文件"
 echo "  2. 启动服务端: npm run server"
 echo "  3. 启动客户端: npm start" 

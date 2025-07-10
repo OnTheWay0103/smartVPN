@@ -27,13 +27,13 @@ module.exports = {
     // TLS证书配置
     tls: {
         // 客户端私钥文件路径（仅客户端使用）
-        key: './env/client-key.pem',
+        key: './certs/client-key.pem',
         
         // 客户端证书文件路径（仅客户端使用）
-        cert: './env/client-cert.pem',
+        cert: './certs/client-cert.pem',
         
         // 服务器证书文件路径（客户端用于验证服务器身份）
-        ca: './env/server-cert.pem'
+        ca: './certs/server-cert.pem'
     },
     
     // 连接配置

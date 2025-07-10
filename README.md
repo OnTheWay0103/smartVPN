@@ -51,20 +51,23 @@ npm install
 ### 3. 生成 TLS 证书
 
 ```bash
-# 进入证书目录
-cd env
+# 使用自动生成脚本（推荐）
+npm run cert:generate
+
+# 或手动生成证书
+cd scripts
 
 # 生成服务器私钥和证书签名请求
-openssl req -newkey rsa:4096 -nodes -keyout server-key.pem -out server.csr -config openssl.cnf
+openssl req -newkey rsa:4096 -nodes -keyout ../certs/server-key.pem -out server.csr -config openssl.cnf
 
 # 生成服务器证书
-openssl x509 -req -in server.csr -signkey server-key.pem -out server-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
+openssl x509 -req -in server.csr -signkey ../certs/server-key.pem -out ../certs/server-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
 
 # 生成客户端私钥和证书签名请求
-openssl req -newkey rsa:4096 -nodes -keyout client-key.pem -out client.csr -config openssl.cnf
+openssl req -newkey rsa:4096 -nodes -keyout ../certs/client-key.pem -out client.csr -config openssl.cnf
 
 # 生成客户端证书
-openssl x509 -req -in client.csr -signkey client-key.pem -out client-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
+openssl x509 -req -in client.csr -signkey ../certs/client-key.pem -out ../certs/client-cert.pem -extensions req_ext -extfile openssl.cnf -days 365
 ```
 
 ### 4. 配置服务端和客户端
