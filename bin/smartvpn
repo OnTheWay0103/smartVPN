@@ -1,4 +1,19 @@
 #!/usr/bin/env node
 
-// 指向主程序入口
-require('../src/index.js'); 
+const path = require('path');
+
+// 根据命令行参数决定启动客户端还是服务端
+const args = process.argv.slice(2);
+const command = args[0];
+
+if (!command || command === 'client') {
+    require(path.join(__dirname, '../src/client/index.js'));
+} else if (command === 'server') {
+    require(path.join(__dirname, '../src/server/index.js'));
+} else {
+    console.log('使用方法:');
+    console.log('  smartvpn [client]    启动客户端 (默认)');
+    console.log('  smartvpn server      启动服务端');
+    console.log('  smartvpn --help      显示帮助信息');
+    process.exit(1);
+} 

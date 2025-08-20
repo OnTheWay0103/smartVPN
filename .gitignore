@@ -68,3 +68,5 @@ test-coverage/
 # 其他
 *.tgz
 *.tar.gz 
+
+.claude/

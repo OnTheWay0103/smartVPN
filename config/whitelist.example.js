@@ -12,8 +12,6 @@ module.exports = {
         "*.vercel.com",
         "googleapis.com",
         "*.googleapis.com",
-        "cursor.com",
-        "*.cursor.com",
         "amazonaws.com",
         "*.amazonaws.com",
         "gstatic.com",
@@ -36,7 +34,21 @@ module.exports = {
         "104.244.43.208",
         "*.cursor.*",
         "chatgpt.com",
-        "*.chatgpt.com"
+        "*.chatgpt.com",
+        "x.com",
+        "*.x.com",
+        "reddit.com",
+        "*.reddit.com",
+        "semrush.com",
+        "*.semrush.com",
+        "bolt.new/",
+        "*.bolt.new/",
+        "v2ex.com",
+        "*.v2ex.com",
+        "chatgpt.com",
+        "*.chatgpt.com",
+        "oaiusercontent.com",
+        "*.oaiusercontent.com"
     ]
 } 
 

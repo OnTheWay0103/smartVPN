@@ -2,7 +2,10 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const CONFIG = require('../lib/utils/const');
+const logger = require('../../shared/utils/logger');
+const CONFIG = {
+  REGEDIT_VBS_PATH: path.join(__dirname, '..', '..', 'tools')
+};
 
 function writeTempFile(lines) {
   const tmpPath = path.join(os.tmpdir(), `vpn-proxy-${Date.now()}-${Math.random()}.txt`);
@@ -142,7 +145,14 @@ function getMacAvailableNetworks() {
   });
 }
 
-module.exports = {
-  setProxy,
-  closeProxy
-};
+class ProxyManager {
+  async setProxy(host, port) {
+    return setProxy(host, port);
+  }
+
+  async closeProxy() {
+    return closeProxy();
+  }
+}
+
+module.exports = ProxyManager;
