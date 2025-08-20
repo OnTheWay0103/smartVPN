@@ -7,7 +7,7 @@
     "smartvpn": "./bin/smartvpn"
   },
   "scripts": {
-    "start": "node src/client/index.js",
+    "start": "NODE_ENV=production node src/client/index.js",
     "server": "node src/server/index.js",
     "test": "jest",
     "test:unit": "jest tests/unit",

@@ -7,7 +7,7 @@ class ConfigManager {
     }
 
     loadConfig() {
-        const env = process.env.NODE_ENV || 'development';
+        const env = process.env.NODE_ENV || 'default';
         
         // 加载默认配置
         const configDir = path.join(__dirname, '..', '..', '..', 'config');
