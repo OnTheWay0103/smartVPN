@@ -46,8 +46,12 @@ class SmartVPNServer {
             });
 
             return new Promise((resolve, reject) => {
-                this.server.listen(serverConfig.remote.port, serverConfig.remote.host, () => {
-                    logger.info(`服务端启动成功，监听 ${serverConfig.remote.host}:${serverConfig.remote.port}`);
+                // 使用正确的监听配置
+                const listenHost = serverConfig.listen?.host || '0.0.0.0';
+                const listenPort = serverConfig.listen?.port || 443;
+                
+                this.server.listen(listenPort, listenHost, () => {
+                    logger.info(`服务端启动成功，监听 ${listenHost}:${listenPort}`);
                     this.isRunning = true;
                     this.startMonitoring();
                     resolve();
