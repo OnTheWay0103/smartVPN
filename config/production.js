@@ -27,7 +27,7 @@ module.exports = {
         key: process.env.TLS_KEY_PATH || './certs/server-key.pem',
         cert: process.env.TLS_CERT_PATH || './certs/server-cert.pem',
         ca: process.env.TLS_CA_PATH ? 
-            process.env.TLS_CA_PATH.split(',') : ['./certs/client-cert.pem']
+            process.env.TLS_CA_PATH.split(',') : []
     },
 
     logging: {

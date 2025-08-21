@@ -25,22 +25,21 @@ class SmartVPNServer {
 
             // 创建TLS服务器
             const serverConfig = config.getServerConfig();
-            const tlsConfig = config.getTlsConfig();
+            
+            // 服务端使用专门的证书路径
+            const certDir = path.resolve('./certs');
+            const serverKey = path.join(certDir, 'server-key.pem');
+            const serverCert = path.join(certDir, 'server-cert.pem');
 
             // 兼容性TLS配置
             const tlsOptions = {
-                key: fs.readFileSync(tlsConfig.key),
-                cert: fs.readFileSync(tlsConfig.cert),
+                key: fs.readFileSync(serverKey),
+                cert: fs.readFileSync(serverCert),
                 minVersion: 'TLSv1.2',  // 使用支持的TLS版本
                 ciphers: 'DEFAULT',     // 使用默认密码套件
                 requestCert: false,     // 不要求客户端证书（兼容老版本）
                 rejectUnauthorized: false // 不验证客户端证书（兼容老版本）
             };
-
-            // 如果有CA证书，则添加
-            if (tlsConfig.ca && tlsConfig.ca.length > 0) {
-                tlsOptions.ca = tlsConfig.ca.map(caFile => fs.readFileSync(caFile));
-            }
 
             this.server = tls.createServer(tlsOptions, (socket) => {
                 this.handleClientConnection(socket);
@@ -67,21 +66,20 @@ class SmartVPNServer {
     }
 
     async validateCertificates() {
-        const tlsConfig = config.getTlsConfig();
-        const requiredFiles = [
-            tlsConfig.key,
-            tlsConfig.cert,
-            ...tlsConfig.ca
-        ];
+        // 服务端使用专门的证书路径
+        const certDir = path.resolve('./certs');
+        const serverKey = path.join(certDir, 'server-key.pem');
+        const serverCert = path.join(certDir, 'server-cert.pem');
+
+        const requiredFiles = [serverKey, serverCert];
 
         for (const certFile of requiredFiles) {
-            const certPath = path.resolve(certFile);
-            if (!fs.existsSync(certPath)) {
-                throw new Error(`证书文件不存在: ${certPath}`);
+            if (!fs.existsSync(certFile)) {
+                throw new Error(`服务端证书文件不存在: ${certFile}`);
             }
         }
 
-        logger.info('证书验证通过');
+        logger.info('服务端证书验证通过');
     }
 
     handleClientConnection(socket) {
