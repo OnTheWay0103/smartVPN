@@ -28,9 +28,6 @@ certs/*.key
 certs/*.crt
 certs/*.csr
 
-# 配置文件（包含敏感信息）
-config/config.js
-
 # 临时文件
 userinput.py
 
