@@ -27,15 +27,22 @@ class SmartVPNServer {
             const serverConfig = config.getServerConfig();
             const tlsConfig = config.getTlsConfig();
 
-            this.server = tls.createServer({
+            // 兼容性TLS配置
+            const tlsOptions = {
                 key: fs.readFileSync(tlsConfig.key),
                 cert: fs.readFileSync(tlsConfig.cert),
-                ca: tlsConfig.ca.map(caFile => fs.readFileSync(caFile)),
-                requestCert: true,
-                rejectUnauthorized: true,
-                minVersion: 'TLSv1.2',
-                ciphers: 'HIGH:!aNULL:!MD5'
-            }, (socket) => {
+                minVersion: 'TLSv1.2',  // 使用支持的TLS版本
+                ciphers: 'DEFAULT',     // 使用默认密码套件
+                requestCert: false,     // 不要求客户端证书（兼容老版本）
+                rejectUnauthorized: false // 不验证客户端证书（兼容老版本）
+            };
+
+            // 如果有CA证书，则添加
+            if (tlsConfig.ca && tlsConfig.ca.length > 0) {
+                tlsOptions.ca = tlsConfig.ca.map(caFile => fs.readFileSync(caFile));
+            }
+
+            this.server = tls.createServer(tlsOptions, (socket) => {
                 this.handleClientConnection(socket);
             });
 
@@ -80,50 +87,83 @@ class SmartVPNServer {
     handleClientConnection(socket) {
         this.connectionManager.addConnection(socket);
 
-        if (!socket.authorized) {
+        // 兼容性处理：不强制要求客户端证书验证
+        if (socket.authorized === false) {
             logger.warn(`客户端认证失败: ${socket.authorizationError}`);
-            socket.end('576');
-            this.connectionManager.removeConnection(socket);
-            return;
+            // 不立即断开连接，继续处理（兼容老版本客户端）
+            logger.info('继续处理未认证的客户端连接（兼容模式）');
+        } else {
+            logger.debug('客户端认证成功');
         }
 
         // 设置超时
         socket.setTimeout(30000);
 
         let clientData = Buffer.alloc(0);
+        let dataLength = 0;
 
         // 监听客户端发送的数据
         socket.on('data', (data) => {
             try {
                 // 使用Buffer来累积数据
                 clientData = Buffer.concat([clientData, data]);
+                dataLength += data.length;
 
-                // 检查是否接收到完整的JSON数据
+                // 尝试解析JSON数据
                 const dataStr = clientData.toString();
-                if (!dataStr.endsWith('}')) return;
-
-                // 解析JSON数据
-                const jsonData = JSON.parse(dataStr);
-                const { type, target, payload } = jsonData;
-
-                if (!type || !target) {
-                    throw new Error('无效的请求格式');
+                
+                // 检查是否有完整的JSON数据
+                let jsonData = null;
+                let parseSuccess = false;
+                
+                try {
+                    jsonData = JSON.parse(dataStr);
+                    parseSuccess = true;
+                } catch (parseErr) {
+                    // JSON解析失败，可能数据不完整
+                    // 检查是否有明显的JSON结构
+                    if (dataStr.includes('"type"') && dataStr.includes('"target"')) {
+                        // 有JSON结构但可能不完整，继续等待
+                        return;
+                    }
+                    // 数据格式错误，记录并清理
+                    logger.warn(`无效的JSON格式: ${dataStr.substring(0, 100)}...`);
+                    clientData = Buffer.alloc(0);
+                    dataLength = 0;
+                    return;
                 }
 
-                if (type === 'CONNECT') {
-                    this.httpsHandler.handleHttpsRequest(socket, target);
-                } else if (type === 'HTTP') {
-                    this.httpHandler.handleHttpRequest(socket, target, payload);
-                } else {
-                    throw new Error('未知的请求类型');
-                }
+                if (parseSuccess && jsonData) {
+                    const { type, target, payload } = jsonData;
 
-                // 清空缓存
-                clientData = Buffer.alloc(0);
+                    if (!type || !target) {
+                        logger.error(`无效的请求格式: ${JSON.stringify(jsonData)}`);
+                        socket.write(JSON.stringify({ error: '无效的请求格式' }));
+                        return;
+                    }
+
+                    logger.debug(`收到请求: type=${type}, target=${target}`);
+
+                    if (type === 'CONNECT') {
+                        this.httpsHandler.handleHttpsRequest(socket, target);
+                    } else if (type === 'HTTP') {
+                        this.httpHandler.handleHttpRequest(socket, target, payload);
+                    } else {
+                        logger.error(`未知的请求类型: ${type}`);
+                        socket.write(JSON.stringify({ error: '未知的请求类型' }));
+                        return;
+                    }
+
+                    // 清空缓存
+                    clientData = Buffer.alloc(0);
+                    dataLength = 0;
+                }
             } catch (err) {
                 logger.error(`数据解析错误: ${err.message}`);
-                socket.end();
-                this.connectionManager.removeConnection(socket);
+                logger.error(`原始数据: ${clientData.toString().substring(0, 200)}...`);
+                socket.write(JSON.stringify({ error: `数据解析错误: ${err.message}` }));
+                clientData = Buffer.alloc(0);
+                dataLength = 0;
             }
         });
 

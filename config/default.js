@@ -50,8 +50,8 @@ module.exports = {
 
     // 日志配置
     logging: {
-        level: process.env.LOG_LEVEL || 'INFO',
-        format: 'json',
+        level: process.env.LOG_LEVEL || 'debug',
+        format: 'text',
         destinations: ['console']
     }
 }

@@ -104,6 +104,14 @@ class LocalProxyServer {
 
         const targetAddress = hostHeader.split(' ')[1];
         
+        // 验证目标地址
+        if (!targetAddress || targetAddress === '0.0.0.0' || targetAddress === '127.0.0.1') {
+            this.handleError(clientSocket, new Error(`无效的目标地址: ${targetAddress}`), 'HTTP请求错误');
+            return;
+        }
+        
+        logger.debug(`HTTP请求目标地址: ${targetAddress}`);
+        
         if (this.domainFilter.shouldUseProxy(targetAddress)) {
             logger.info(`处理HTTP代理请求: ${targetAddress}`);
         } else {
@@ -124,10 +132,16 @@ class LocalProxyServer {
         const tlsConfig = config.getTlsConfig();
         const serverConfig = config.getServerConfig();
         
+        // 获取远程服务器配置，支持多种配置格式
+        const remoteHost = serverConfig.remote?.host || serverConfig.host || '43.159.38.35';
+        const remotePort = serverConfig.remote?.port || serverConfig.port || 443;
+        
+        logger.debug(`尝试连接到远程服务器: ${remoteHost}:${remotePort}`);
+        
         return new Promise((resolve, reject) => {
             const socket = tls.connect({
-                host: serverConfig.remote.host,
-                port: serverConfig.remote.port,
+                host: remoteHost,
+                port: remotePort,
                 key: require('fs').readFileSync(tlsConfig.key),
                 cert: require('fs').readFileSync(tlsConfig.cert),
                 ca: tlsConfig.ca.map(caFile => require('fs').readFileSync(caFile)),
@@ -141,10 +155,15 @@ class LocalProxyServer {
                 }
             });
 
-            socket.on('error', reject);
+            socket.on('error', (error) => {
+                logger.error(`TLS连接错误: ${error.message}`);
+                logger.error(`尝试连接的地址: ${remoteHost}:${remotePort}`);
+                reject(error);
+            });
+            
             socket.setTimeout(30000, () => {
                 socket.destroy();
-                reject(new Error('连接超时'));
+                reject(new Error(`连接超时: ${remoteHost}:${remotePort}`));
             });
         });
     }
@@ -197,11 +216,20 @@ class LocalProxyServer {
     }
 
     async directConnect(clientSocket, host, port, requestData) {
+        // 验证主机地址
+        if (!host || host === '0.0.0.0' || host === '127.0.0.1') {
+            this.handleError(clientSocket, new Error(`无效的目标主机地址: ${host}`), '直接连接错误');
+            return;
+        }
+
+        logger.debug(`尝试直接连接到: ${host}:${port}`);
+        
         const targetSocket = require('net').connect({
             host: host,
-            port: port,
+            port: port || 443,
             timeout: 10000
         }, () => {
+            logger.debug(`直接连接成功: ${host}:${port}`);
             if (requestData.startsWith('CONNECT')) {
                 clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
             } else {
@@ -213,7 +241,12 @@ class LocalProxyServer {
         });
 
         targetSocket.on('error', (err) => {
+            logger.error(`直接连接错误 ${host}:${port}: ${err.message}`);
             this.handleError(clientSocket, err, '直接连接错误');
+        });
+
+        targetSocket.on('end', () => {
+            logger.debug(`直接连接结束: ${host}:${port}`);
         });
     }
 
@@ -282,6 +315,14 @@ class LocalProxyServer {
 
     async stop() {
         if (this.server) {
+            // 清理所有活跃连接
+            for (const connection of this.activeConnections) {
+                if (!connection.destroyed) {
+                    connection.destroy();
+                }
+            }
+            this.activeConnections.clear();
+
             return new Promise((resolve) => {
                 this.server.close(() => {
                     logger.info('本地代理服务器已停止');

@@ -1,5 +1,5 @@
 const net = require('net');
-const logger = require('../shared/utils/logger');
+const logger = require('../../shared/utils/logger');
 
 class HttpsHandler {
     constructor() {
@@ -12,6 +12,8 @@ class HttpsHandler {
         try {
             // 解析目标地址和端口
             const [host, port = 443] = target.split(':');
+            
+            logger.debug(`尝试连接到目标服务器: ${host}:${port}`);
 
             // 连接到目标服务器
             const targetSocket = net.connect({
@@ -19,7 +21,9 @@ class HttpsHandler {
                 port: port,
                 timeout: 10000
             }, () => {
-                logger.info(`HTTPS隧道建立: ${target}`);
+                logger.info(`HTTPS隧道建立成功: ${target}`);
+                
+                // 发送成功响应给客户端
                 clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
                 
                 // 双向转发数据
@@ -39,6 +43,8 @@ class HttpsHandler {
             // 处理错误
             targetSocket.on('error', (err) => {
                 logger.error(`HTTPS目标错误: ${err.message}`);
+                // 发送错误响应给客户端
+                clientSocket.write(`HTTP/1.1 502 Bad Gateway\r\n\r\n`);
                 clientSocket.end();
                 this.activeConnections.delete(targetSocket);
             });

@@ -1,6 +1,6 @@
 const net = require('net');
-const logger = require('../shared/utils/logger');
-const config = require('../shared/config');
+const logger = require('../../shared/utils/logger');
+const config = require('../../shared/config');
 
 class HttpHandler {
     constructor() {
@@ -13,6 +13,8 @@ class HttpHandler {
         try {
             // 解析目标地址和端口
             const [host, port = 80] = target.split(':');
+            
+            logger.debug(`尝试连接到目标服务器: ${host}:${port}`);
 
             // 创建到目标服务器的连接
             const targetSocket = net.connect({
@@ -20,7 +22,9 @@ class HttpHandler {
                 port: port,
                 timeout: 10000
             }, () => {
-                logger.info(`HTTP连接建立: ${target}`);
+                logger.info(`HTTP连接建立成功: ${target}`);
+                
+                // 发送HTTP请求到目标服务器
                 targetSocket.write(payload);
                 this.activeConnections.add(targetSocket);
             });
@@ -40,6 +44,8 @@ class HttpHandler {
             // 处理错误
             targetSocket.on('error', (err) => {
                 logger.error(`HTTP目标错误: ${err.message}`);
+                // 发送错误响应给客户端
+                clientSocket.write(`HTTP/1.1 502 Bad Gateway\r\n\r\n`);
                 clientSocket.end();
                 this.activeConnections.delete(targetSocket);
             });

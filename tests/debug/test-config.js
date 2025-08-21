@@ -1,0 +1,1 @@
+console.log("测试配置加载..."); const config = require("./src/shared/config"); console.log("客户端配置:", JSON.stringify(config.getClientConfig(), null, 2)); console.log("服务器配置:", JSON.stringify(config.getServerConfig(), null, 2));

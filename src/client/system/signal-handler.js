@@ -1,11 +1,21 @@
 const logger = require('../../shared/utils/logger');
 const ProxyManager = require('./proxy-manager');
+const EventCleanup = require('./event-cleanup');
 
 class SignalHandler {
     constructor() {
+        // 防止重复初始化
+        if (SignalHandler.instance) {
+            return SignalHandler.instance;
+        }
+        
         this.cleanupFunctions = [];
         this.proxyManager = new ProxyManager();
+        this.eventCleanup = new EventCleanup();
+        this.isInitialized = false;
         this.setupSignalHandlers();
+        
+        SignalHandler.instance = this;
     }
 
     addCleanupFunction(fn) {
@@ -13,6 +23,11 @@ class SignalHandler {
     }
 
     setupSignalHandlers() {
+        // 防止重复设置监听器
+        if (this.isInitialized) {
+            return;
+        }
+
         const cleanup = async () => {
             logger.info('收到关闭信号，开始清理...');
             
@@ -33,6 +48,14 @@ class SignalHandler {
                 process.exit(1);
             }
         };
+
+        // 移除可能存在的旧监听器
+        process.removeAllListeners('SIGINT');
+        process.removeAllListeners('SIGTERM');
+        process.removeAllListeners('SIGQUIT');
+        process.removeAllListeners('uncaughtException');
+        process.removeAllListeners('unhandledRejection');
+        process.removeAllListeners('warning');
 
         // 监听各种退出信号
         process.on('SIGINT', cleanup);   // Ctrl+C
@@ -57,6 +80,25 @@ class SignalHandler {
         process.on('warning', (warning) => {
             logger.warn(`进程警告: ${warning.name} - ${warning.message}`);
         });
+
+        this.isInitialized = true;
+    }
+
+    // 清理所有监听器
+    cleanup() {
+        // 使用EventCleanup工具清理
+        this.eventCleanup.cleanupAll();
+        
+        // 清理process监听器
+        process.removeAllListeners('SIGINT');
+        process.removeAllListeners('SIGTERM');
+        process.removeAllListeners('SIGQUIT');
+        process.removeAllListeners('uncaughtException');
+        process.removeAllListeners('unhandledRejection');
+        process.removeAllListeners('warning');
+        
+        this.cleanupFunctions = [];
+        this.isInitialized = false;
     }
 
     async gracefulShutdown() {

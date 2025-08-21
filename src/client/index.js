@@ -5,12 +5,20 @@ const LocalProxyServer = require('./proxy/local-server');
 const SignalHandler = require('./system/signal-handler');
 const ProxyManager = require('./system/proxy-manager');
 
+// 设置EventEmitter的最大监听器数量，防止内存泄漏警告
+require('events').EventEmitter.defaultMaxListeners = 20;
+
 class SmartVPNClient {
     constructor() {
         this.localServer = new LocalProxyServer();
         this.signalHandler = new SignalHandler();
         this.proxyManager = new ProxyManager();
         this.isRunning = false;
+        
+        // 注册清理函数
+        this.signalHandler.addCleanupFunction(async () => {
+            await this.stop();
+        });
     }
 
     async start() {
@@ -28,10 +36,7 @@ class SmartVPNClient {
                 logger.info('启动模式: 全局代理模式 (代理所有流量)');
             }
 
-            // 注册清理函数
-            this.signalHandler.addCleanupFunction(async () => {
-                await this.stop();
-            });
+
 
             // 设置系统代理
             await this.setupSystemProxy();
