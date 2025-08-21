@@ -27,7 +27,7 @@ class SmartVPNServer {
             const serverConfig = config.getServerConfig();
             
             // 服务端使用专门的证书路径
-            const certDir = path.resolve('./certs');
+            const certDir = path.join(__dirname, '..', '..', 'certs');
             const serverKey = path.join(certDir, 'server-key.pem');
             const serverCert = path.join(certDir, 'server-cert.pem');
 
@@ -67,7 +67,7 @@ class SmartVPNServer {
 
     async validateCertificates() {
         // 服务端使用专门的证书路径
-        const certDir = path.resolve('./certs');
+        const certDir = path.join(__dirname, '..', '..', 'certs');
         const serverKey = path.join(certDir, 'server-key.pem');
         const serverCert = path.join(certDir, 'server-cert.pem');
 

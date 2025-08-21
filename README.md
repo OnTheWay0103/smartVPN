@@ -407,20 +407,20 @@ NODE_ENV=development npm start
 ### 快速部署
 
 #### 1. 证书准备
-确保服务器上有以下证书文件：
+确保项目目录下有证书文件：
 ```
-/home/ubuntu/smartVPN/certs/
+smartVPN/certs/
 ├── server-key.pem    # 服务器私钥
 └── server-cert.pem   # 服务器证书
 ```
 
-#### 2. 直接启动
+#### 2. 直接启动（推荐测试用）
 ```bash
-cd /home/ubuntu/smartVPN
+cd /path/to/smartVPN
 sudo NODE_ENV=production node src/server/index.js
 ```
 
-#### 3. 使用PM2部署（推荐）
+#### 3. 使用PM2部署（生产环境推荐）
 ```bash
 # 安装PM2
 npm install -g pm2
@@ -435,15 +435,6 @@ sudo pm2 startup
 # 查看状态
 pm2 status
 pm2 logs smartvpn-server
-```
-
-#### 4. 环境变量配置
-```bash
-# 可选：自定义配置
-export SERVER_HOST=0.0.0.0
-export SERVER_PORT=443
-export TLS_KEY_PATH=/home/ubuntu/smartVPN/certs/server-key.pem
-export TLS_CERT_PATH=/home/ubuntu/smartVPN/certs/server-cert.pem
 ```
 
 ### 防火墙配置
