@@ -24,7 +24,7 @@ module.exports = {
     // 服务端配置
     server: {
         remote: {
-            host: '0.0.0.0',
+            host: 'localhost',  // 默认本地测试，生产环境需修改为实际服务器IP
             port: 443
         },
         monitoring: {

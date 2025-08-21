@@ -437,16 +437,47 @@ pm2 status
 pm2 logs smartvpn-server
 ```
 
-### IP地址配置
-如果遇到 `EADDRNOTAVAIL` 错误，请使用以下配置：
+### 服务器和客户端配置
+
+#### 服务端监听配置
+服务端使用环境变量配置监听地址：
 
 ```bash
-# 使用环境变量覆盖IP配置
-export SERVER_HOST=0.0.0.0
-export SERVER_PORT=443
+# 服务端监听设置（在服务器上执行）
+export SERVER_HOST=0.0.0.0      # 监听所有网络接口
+export SERVER_PORT=443          # 监听端口
 
 # 启动服务端
 sudo NODE_ENV=production SERVER_HOST=0.0.0.0 node src/server/index.js
+```
+
+#### 客户端连接配置
+客户端需要配置实际的服务器IP地址：
+
+```bash
+# 客户端连接设置（在客户端机器上执行）
+export REMOTE_HOST=YOUR_SERVER_IP   # 替换为实际服务器IP地址
+export REMOTE_PORT=443              # 服务器端口
+
+# 启动客户端
+NODE_ENV=production REMOTE_HOST=YOUR_SERVER_IP node src/client/index.js
+```
+
+#### 常见配置示例
+```bash
+# 本地测试（同一台机器）
+# 服务端：
+sudo NODE_ENV=production node src/server/index.js
+
+# 客户端：
+NODE_ENV=production node src/client/index.js
+
+# 远程连接（不同机器）
+# 服务端（在服务器上）：
+sudo NODE_ENV=production SERVER_HOST=0.0.0.0 node src/server/index.js
+
+# 客户端（在客户端机器上）：
+NODE_ENV=production REMOTE_HOST=192.168.1.100 node src/client/index.js
 ```
 
 ### 防火墙配置
