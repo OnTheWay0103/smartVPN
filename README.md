@@ -437,6 +437,18 @@ pm2 status
 pm2 logs smartvpn-server
 ```
 
+### IP地址配置
+如果遇到 `EADDRNOTAVAIL` 错误，请使用以下配置：
+
+```bash
+# 使用环境变量覆盖IP配置
+export SERVER_HOST=0.0.0.0
+export SERVER_PORT=443
+
+# 启动服务端
+sudo NODE_ENV=production SERVER_HOST=0.0.0.0 node src/server/index.js
+```
+
 ### 防火墙配置
 ```bash
 # Ubuntu/Debian

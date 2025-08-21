@@ -24,7 +24,7 @@ module.exports = {
     // 服务端配置
     server: {
         remote: {
-            host: '43.159.38.35',
+            host: '0.0.0.0',
             port: 443
         },
         monitoring: {
