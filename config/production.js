@@ -12,7 +12,7 @@ module.exports = {
     
     server: {
         remote: {
-            host: process.env.SERVER_HOST || '0.0.0.0',
+            host: process.env.SERVER_HOST || '43.159.38.35',
             port: process.env.SERVER_PORT || 443
         },
         monitoring: {

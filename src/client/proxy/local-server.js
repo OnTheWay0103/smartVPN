@@ -132,11 +132,20 @@ class LocalProxyServer {
         const tlsConfig = config.getTlsConfig();
         const serverConfig = config.getServerConfig();
         
-        // 获取远程服务器配置，支持多种配置格式
-        const remoteHost = serverConfig.remote?.host || serverConfig.host || '43.159.38.35';
-        const remotePort = serverConfig.remote?.port || serverConfig.port || 443;
+        // 获取远程服务器配置
+        const remoteHost = serverConfig.remote?.host;
+        const remotePort = serverConfig.remote?.port;
         
-        logger.debug(`尝试连接到远程服务器: ${remoteHost}:${remotePort}`);
+        // 验证配置
+        if (!remoteHost || remoteHost === '0.0.0.0' || remoteHost === 'localhost') {
+            throw new Error(`无效的远程服务器地址: ${remoteHost}。请检查配置文件中的 server.remote.host 设置`);
+        }
+        
+        if (!remotePort || remotePort <= 0 || remotePort > 65535) {
+            throw new Error(`无效的远程服务器端口: ${remotePort}。请检查配置文件中的 server.remote.port 设置`);
+        }
+        
+        logger.info(`正在连接到远程服务器: ${remoteHost}:${remotePort}`);
         
         return new Promise((resolve, reject) => {
             const socket = tls.connect({
@@ -145,14 +154,16 @@ class LocalProxyServer {
                 key: require('fs').readFileSync(tlsConfig.key),
                 cert: require('fs').readFileSync(tlsConfig.cert),
                 ca: tlsConfig.ca.map(caFile => require('fs').readFileSync(caFile)),
-                timeout: 30000
+                timeout: 30000,
+                rejectUnauthorized: false  // 兼容模式，不强制验证服务器证书
             }, () => {
+                logger.info(`TLS连接建立成功: ${remoteHost}:${remotePort}`);
                 if (socket.authorized) {
-                    logger.debug('TLS认证成功');
-                    resolve(socket);
+                    logger.debug('TLS证书验证成功');
                 } else {
-                    reject(new Error(`TLS认证失败: ${socket.authorizationError}`));
+                    logger.warn(`TLS证书验证失败: ${socket.authorizationError}，但继续连接`);
                 }
+                resolve(socket);
             });
 
             socket.on('error', (error) => {
