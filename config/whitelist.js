@@ -9,27 +9,49 @@ module.exports = {
     
     // 白名单域名列表
     domains: [
-        // 常用网站
-        'google.com',
-        '*.google.com',
-        'github.com',
-        '*.github.com',
-        'stackoverflow.com',
-        '*.stackoverflow.com',
-        
-        // 开发工具
-        'npmjs.com',
-        '*.npmjs.com',
-        'pypi.org',
-        '*.pypi.org',
-        
-        // 云服务
-        'aws.amazon.com',
-        '*.aws.amazon.com',
-        'azure.microsoft.com',
-        '*.azure.microsoft.com',
-        'cloud.google.com',
-        '*.cloud.google.com',
+        "google.com",
+        "*.google.com",
+        "vercel.com",
+        "*.vercel.com",
+        "googleapis.com",
+        "*.googleapis.com",
+        "amazonaws.com",
+        "*.amazonaws.com",
+        "gstatic.com",
+        "*.gstatic.com",
+        "googletagmanager.com",
+        "*.googletagmanager.com",
+        "google-analytics.com",
+        "*.google-analytics.com",
+        // anthropic need
+        "anthropic.com",
+        "*.anthropic.com",
+        "sentry.io",
+        "*.sentry.io",
+        // \ anthropic need
+        "youtube.com",
+        "*.youtube.com",
+        // 下面这个IP不知道是什么，好像geminicli用到，测试一下
+        "31.13.94.41",
+        "199.96.62.17",
+        "104.244.43.208",
+        "*.cursor.*",
+        "chatgpt.com",
+        "*.chatgpt.com",
+        "x.com",
+        "*.x.com",
+        "reddit.com",
+        "*.reddit.com",
+        "semrush.com",
+        "*.semrush.com",
+        "bolt.new/",
+        "*.bolt.new/",
+        "v2ex.com",
+        "*.v2ex.com",
+        "chatgpt.com",
+        "*.chatgpt.com",
+        "oaiusercontent.com",
+        "*.oaiusercontent.com",
         
         // 测试域名
         'example.com',
